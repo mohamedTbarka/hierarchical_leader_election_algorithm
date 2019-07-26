@@ -11,6 +11,4 @@ them to have access to a common global time. This new feature makes the algorith
 flexible and applicable to real situations, while still providing a correctness proof. It is also proved
 that in certain well behaved situations, a new leader is not elected unnecessarily.
 
-<p align="center">
 ![](myimage.gif)
-</p>
