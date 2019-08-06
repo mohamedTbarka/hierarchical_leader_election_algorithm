@@ -63,7 +63,6 @@ public class LonerMessageBased_1 extends Node {
         this.setLabel(l);
         System.out.println("hello");
         System.out.println(this.heights.get(c).getDelta());
-
     }
 
 
@@ -157,7 +156,6 @@ public class LonerMessageBased_1 extends Node {
             {
                 Message message = new Message(this.getHeights().get(this.id));
                 send(entry.getValue(), message);
-
             }
         }
         //super.onLinkRemoved(link);
@@ -178,7 +176,7 @@ public class LonerMessageBased_1 extends Node {
     @Override
     public void onMessage(Message msg) {
         Height height = (Height) msg.getContent();
-        MyNode n = (MyNode)msg.getSender();
+        MyNode n = (MyNode) msg.getSender();
         this.neighbors.put(height.getId(), n);
         this.forming.remove(height.getId());
         this.heights.replace(height.getId(), height);
