@@ -11,7 +11,7 @@ public class MessagePassing{
     public static void main(String[] args){
 
         Topology tp = new Topology();
-        tp.setDefaultNodeModel(LonerMessageBased_1.class);
+        tp.setDefaultNodeModel(MyNode.class);
 
         tp.setTimeUnit(500);
         tp.addNode(10, 10);

@@ -16,6 +16,8 @@
       <root url="jar://$MAVEN_REPOSITORY$/io/jbotsim/jbotsim-icons/1.0.0/jbotsim-icons-1.0.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ideaLibSources/jbotsim-core-1.0.0-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

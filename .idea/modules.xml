@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/distributed_algorithm.iml" filepath="$PROJECT_DIR$/distributed_algorithm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hierarchical_leader_election_algorithm.iml" filepath="$PROJECT_DIR$/hierarchical_leader_election_algorithm.iml" />
     </modules>
   </component>
 </project>
