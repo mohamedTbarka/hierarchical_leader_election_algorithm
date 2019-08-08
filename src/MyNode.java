@@ -1,3 +1,4 @@
+import com.sun.scenario.effect.impl.sw.java.JSWBlend_HARD_LIGHTPeer;
 import io.jbotsim.core.Color;
 import io.jbotsim.core.Link;
 import io.jbotsim.core.Message;
@@ -9,28 +10,28 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * @author mohamed
+ * @author Mohamed Tbarka
  * @project Hierarchical Leader Election Algorithm with Remoteness Constraint
  */
 
-public class MyNode extends Node {
+public class MyNode extends Node implements Comparable<MyNode> {
     //private boolean heardSomeone = false;
     // here we gonna put the 7-tuple and the sub-leader pair.
     //private Height height;
-    private char id;
-    private char slid;
-    private char pred;
+    //private char id;
+    //private char slid;
+    //private char pred;
 
-    private int lc;
-    private boolean heightChanged;
+    //private int lc;
+    //private boolean heightChanged;
 
-    private HashMap<Character, MyNode> neighbors;
-    private HashMap<Character, MyNode> forming;
+    //private HashMap<int, MyNode> neighbors;
+    //private HashMap<int, MyNode> forming;
 
-    private HashMap<Character, Height> heights;
+    //private HashMap<int, Height> heights;
 
 
-
+    /*
     public MyNode(char id, HashMap<Character, Height> heights, char slid, char pred, int lc, int d) {
 
         this.id = id;
@@ -63,78 +64,27 @@ public class MyNode extends Node {
         this.setLabel(l);
         System.out.println("hello");
         System.out.println(this.heights.get(c).getDelta());
-    }
+    }*/
 
 
 
-    public char getId() {
-        return id;
-    }
 
-    public void setId(char id) {
-        this.id = id;
-    }
-
-    public HashMap<Character, Height> getHeights() {
-        return heights;
-    }
-
-    public void setHeights(HashMap<Character, Height> heights) {
-        this.heights = heights;
-    }
-
-    public char getSlid() {
-        return slid;
-    }
-
-
-    public HashMap<Character, MyNode> getNs() {
-        return neighbors;
-    }
-
-    public void setNs(HashMap<Character, MyNode> neighbors) {
-        this.neighbors = neighbors;
-    }
-
-    public HashMap<Character, MyNode> getForming() {
-        return forming;
-    }
-
-    public void setForming(HashMap<Character, MyNode> forming) {
-        this.forming = forming;
-    }
-
-    public void setSlid(char slid) {
-        this.slid = slid;
-    }
-
-    public char getPred() {
-        return pred;
-    }
-
-    public void setPred(char pred) {
-        this.pred = pred;
-    }
-
-    public int getLc() {
-        return lc;
-    }
-
-    public void setLc(int lc) {
-        this.lc = lc;
-    }
 
 
     @Override
     public void setLabel(Object label) {
-        super.setLabel("("+ this.heights.get(this.id).getTau()+ ", " + this.heights.get(this.id).getOid() + ", " + this.heights.get(this.id).getR() + ", " + this.heights.get(this.id).getDelta() + ", " + this.heights.get(this.id).getNlts() + ", " + this.heights.get(this.id).getLid() + ", " + this.heights.get(this.id).getId()+ ") - (" + this.slid + ", " + this.pred + ") - LC : " + this.lc);
+        Height h = (Height)this.getProperty("height");
+        SubLeaderPair slp = (SubLeaderPair) this.getProperty("slp");
+        LogicalClock lc = (LogicalClock) this.getProperty("lc");
+        super.setLabel(h.toString() + slp.toString() + lc.toString());
+        // super.setLabel("("+ this.heights.get(this.id).getTau()+ ", " + this.heights.get(this.id).getOid() + ", " + this.heights.get(this.id).getR() + ", " + this.heights.get(this.id).getDelta() + ", " + this.heights.get(this.id).getNlts() + ", " + this.heights.get(this.id).getLid() + ", " + this.heights.get(this.id).getId()+ ") - (" + this.slid + ", " + this.pred + ") - LC : " + this.lc);
     }
-
+/*
     @Override
     public void onLinkRemoved(Link link) {
         System.out.println("hello");
         Node n = link.getOtherEndpoint(this);
-        MyNode nn = (MyNode) n;
+        //MyNode nn = (MyNode) n;
         this.forming.remove(nn.getID());
         this.neighbors.remove(nn.getID());
         if(this.neighbors == null) {
@@ -329,17 +279,70 @@ public class MyNode extends Node {
             }
         }
         return true;
-    }
+    }*/
 
     @Override
     public void onStart() {
-        Height h = new Height(0, 0, 0,0, -1,'?', '?');
+        Height h = new Height(0, 0, 0,0, -1,'?');
+        SubLeaderPair slp = new SubLeaderPair(this.getID(), '?');
+        LogicalClock lc = new LogicalClock(0);
         this.setProperty("height", h);
+        this.setProperty("slp", slp);
+        this.setProperty("lc", lc);
     }
 
     @Override
     public void onSelection() {
 
+    }
+
+    @Override
+    public int compareTo(MyNode node) {
+        Height h1 = (Height) this.getProperty("height");
+        Height h2 = (Height) node.getProperty("height");
+
+        if (h1.getTau() > h2.getTau()) {
+            return 1;
+        } else if (h1.getTau() < h2.getTau()) {
+            return -1;
+        } else {
+            if (h1.getOid()> h2.getOid()) {
+                return 1;
+            } else if (h1.getOid()< h2.getOid()) {
+                return -1;
+            } else {
+                if (h1.getR() > h2.getR()) {
+                    return 1;
+                } else if (h1.getR() < h2.getR()) {
+                    return -1;
+                } else {
+                    if (h1.getDelta() > h2.getDelta()) {
+                        return 1;
+                    } else if (h1.getDelta() < h2.getDelta()) {
+                        return -1;
+                    } else {
+                        if (h1.getNlts() > h2.getNlts()) {
+                            return 1;
+                        } else if (h1.getNlts() < h2.getNlts()) {
+                            return -1;
+                        } else {
+                            if (h1.getLid() > h2.getLid()) {
+                                return 1;
+                            } else if (h1.getLid() < h2.getLid()) {
+                                return -1;
+                            } else {
+                                if (this.getID()> node.getID()) {
+                                    return 1;
+                                } else if (this.getID()< node.getID()) {
+                                    return -1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return 0;
     }
 
 }

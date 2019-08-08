@@ -1,15 +1,32 @@
 import io.jbotsim.core.Node;
 
-public class Height implements Comparable<Height> {
+public class Height  {
     private int tau;
     private  int oid;
+
+    public Height(int tau, int oid, int r, int delta, int nlts, int lid) {
+        this.tau = tau;
+        this.oid = oid;
+        this.r = r;
+        this.delta = delta;
+        this.nlts = nlts;
+        this.lid = lid;
+    }
+
     private int r;
 
     private int delta;
-    private int nlts;
 
-    private char lid;
-    private char id;
+    private int nlts;
+    private int lid;
+
+    public void setLid(int lid) {
+        this.lid = lid;
+    }
+
+
+
+    // private char id;
 
     public int getTau() {
         return tau;
@@ -51,7 +68,7 @@ public class Height implements Comparable<Height> {
         this.nlts = nlts;
     }
 
-    public char getLid() {
+    public int getLid() {
         return lid;
     }
 
@@ -59,67 +76,19 @@ public class Height implements Comparable<Height> {
         this.lid = lid;
     }
 
-    public char getId() {
-        return id;
-    }
 
-    public void setId(char id) {
-        this.id = id;
-    }
-
-    public Height(int tau, int oid, int r, int delta, int nlts, char lid, char id) {
+    public Height(int tau, int oid, int r, int delta, int nlts, char lid) {
         this.tau = tau;
         this.oid = oid;
         this.r = r;
         this.delta = delta;
         this.nlts = nlts;
         this.lid = lid;
-        this.id = id;
+        //this.id = id;
     }
-    @Override
-    public int compareTo(Height height) {
 
-        if (this.tau > height.getTau()) {
-            return 1;
-        } else if (this.tau < height.getTau()) {
-            return -1;
-        } else {
-            if (this.oid > height.getOid()) {
-                return 1;
-            } else if (this.oid < height.getOid()) {
-                return -1;
-            } else {
-                if (this.r > height.getR()) {
-                    return 1;
-                } else if (this.r < height.getR()) {
-                    return -1;
-                } else {
-                    if (this.delta > height.getDelta()) {
-                        return 1;
-                    } else if (this.delta < height.getDelta()) {
-                        return -1;
-                    } else {
-                        if (this.nlts > height.getNlts()) {
-                            return 1;
-                        } else if (this.nlts < height.getNlts()) {
-                            return -1;
-                        } else {
-                            if (this.lid > height.getLid()) {
-                                return 1;
-                            } else if (this.lid < height.getLid()) {
-                                return -1;
-                            } else {
-                                if (this.id> height.getId()) {
-                                    return 1;
-                                } else if (this.id < height.getId()) {
-                                    return -1;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return 0;
+    @Override
+    public String toString() {
+        return "Height = ("+this.tau+", "+this.oid+", "+this.r+", "+this.delta+", "+this.nlts+", "+this.lid+", "+')';
     }
 }
