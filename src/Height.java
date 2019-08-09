@@ -89,6 +89,6 @@ public class Height  {
 
     @Override
     public String toString() {
-        return "Height = ("+this.tau+", "+this.oid+", "+this.r+", "+this.delta+", "+this.nlts+", "+this.lid+", "+')';
+        return "Height = ("+this.tau+", "+this.oid+", "+this.r+", "+this.delta+", "+this.nlts+", "+this.lid+", ";
     }
 }

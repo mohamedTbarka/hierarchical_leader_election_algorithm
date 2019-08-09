@@ -14,7 +14,7 @@ import java.util.Random;
  * @project Hierarchical Leader Election Algorithm with Remoteness Constraint
  */
 
-public class MyNode extends Node implements Comparable<Node> {
+public class Test extends Node implements Comparable<Node> {
     //private boolean heardSomeone = false;
     // here we gonna put the 7-tuple and the sub-leader pair.
     //private Height height;
@@ -122,10 +122,24 @@ public class MyNode extends Node implements Comparable<Node> {
 
     public void onMessage(Message msg) {
 
-        Height h1 = (Height) msg.getContent();
+        Height h = (Height) msg.getContent();
         Node n = msg.getSender();
         HashMap<Integer, Height> heights = (HashMap<Integer, Height>) this.getProperty("heights");
-        HashMap<Integer, Node> forming = (HashMap<Integer, Node>) this.getProperty("forming");
+        heights.put(n.getID(), h);
+        //heights.put
+        this.setProperty("heights", heights);
+        //heights = (HashMap<Integer, Height>) this.getProperty("heights");
+        System.out.println("[+] "+this.getID()+"'s heights are :");
+
+        for (Map.Entry<Integer, Height> entry : heights.entrySet())
+        {
+            System.out.println("[+] "+entry.getValue().toString());
+        }
+
+        //System.out.println("[+] node "+this.getID()+" has received this message from node "+n.getID()+" : "+h.toString());
+        /*
+        HashMap<Integer, Height> heights = (HashMap<Integer, Height>) n.getProperty("heights");
+        HashMap<Integer, Node> forming = (HashMap<Integer, Node>) n.getProperty("forming");
         HashMap<Integer, Node> neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
 
         Height h = heights.get(this.getID());
@@ -140,49 +154,15 @@ public class MyNode extends Node implements Comparable<Node> {
         this.setProperty("heights", heights);
         this.setProperty("forming", forming);
         this.setProperty("neighbors", neighbors);
-
-        heights = (HashMap<Integer, Height>) this.getProperty("heights");
-        forming = (HashMap<Integer, Node>) this.getProperty("forming");
+        /*
+        heights = (HashMap<Integer, Height>) n.getProperty("heights");
+        forming = (HashMap<Integer, Node>) n.getProperty("forming");
         neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
         h = heights.get(this.getID());
+        */
 
-        if(heights.get(this.getID()).getNlts() == h.getNlts()) {
-            System.out.println("helloJoker");
-            if(sink()) {
-                Node m = null;
-                int flag=0;
-                for (Map.Entry<Integer, Node> entry : neighbors.entrySet())
-                {
-                    if(m == null)
-                        m = entry.getValue();
-                    if(((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(entry.getKey()).getNlts() == ((HashMap<Integer, Height>) m.getProperty("heights")).get(m.getID()).getNlts() && ((HashMap<Integer, Height>) m.getProperty("heights")).get(entry.getKey()).getLid() == ((HashMap<Integer, Height>) m.getProperty("heights")).get(m.getID()).getLid()) {
-                        flag++;
-                    }
-                }
-                if(flag == neighbors.size()) {
-                    if(heights.get(this.getID()).getTau() > 0 && heights.get(this.getID()).getR() == 0)
-                        reflectRefLevel(n);
-                    else if(heights.get(this.getID()).getTau() > 0 && heights.get(this.getID()).getR() == 0 && heights.get(this.getID()).getOid() == this.getID())
-                        electself();
-                    else
-                        startNewRefLevel();
-                } else
-                    prograteLargestRefLevel();
-            } else
-                adoptLPIfPriority(n);
-            if(myOldHeight != heights.get(this.getID())) {
-                HashMap<Integer, Node> union = new HashMap<>();
-                union.putAll(forming);
-                union.putAll(neighbors);
-                Message msg_1 = new Message(heights.get(this.getID()));
-                for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
-                    send(entry.getValue(), msg_1);
-                }
-            }
-
-        }
-        Label l = new Label("hello");
-        this.setLabel(l);
+        //Label l = new Label("hello");
+        //<this.setLabel(l);
     }
 
     public void electself() {
