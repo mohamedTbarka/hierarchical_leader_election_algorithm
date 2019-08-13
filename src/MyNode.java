@@ -1,4 +1,4 @@
-import com.sun.scenario.effect.impl.sw.java.JSWBlend_HARD_LIGHTPeer;
+//import com.sun.scenario.effect.impl.sw.java.JSWBlend_HARD_LIGHTPeer;
 import io.jbotsim.core.Color;
 import io.jbotsim.core.Link;
 import io.jbotsim.core.Message;
@@ -122,8 +122,12 @@ public class MyNode extends Node implements Comparable<Node> {
 
     public void onMessage(Message msg) {
 
+        this.setColor(Color.getRandomColor());
+        //System.out.println("We're at the level of node : "+this.getID());
+
         Height h1 = (Height) msg.getContent();
         Node n = msg.getSender();
+
         HashMap<Integer, Height> heights = (HashMap<Integer, Height>) this.getProperty("heights");
         HashMap<Integer, Node> forming = (HashMap<Integer, Node>) this.getProperty("forming");
         HashMap<Integer, Node> neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
@@ -131,66 +135,76 @@ public class MyNode extends Node implements Comparable<Node> {
         Height h = heights.get(this.getID());
         //System.out.println(h.getId());
         //MyNode n = (MyNode) msg.getSender();
-        heights.put(n.getID(), h1);
+        MyNode oldNode = this;
+        //heights.put(n.getID(), h1);
         forming.remove(n.getID());
+
         Height myOldHeight = h;
+
         heights.replace(n.getID(), h1);
 
-        heights.put(this.getID(), h);
+        //heights.put(this.getID(), h);
         this.setProperty("heights", heights);
         this.setProperty("forming", forming);
         this.setProperty("neighbors", neighbors);
 
-        heights = (HashMap<Integer, Height>) this.getProperty("heights");
-        forming = (HashMap<Integer, Node>) this.getProperty("forming");
-        neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
-        h = heights.get(this.getID());
+        //heights = (HashMap<Integer, Height>) this.getProperty("heights");
+        //forming = (HashMap<Integer, Node>) this.getProperty("forming");
+        //neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
+        //h = heights.get(this.getID());
 
-        if(heights.get(this.getID()).getNlts() == h.getNlts()) {
-            System.out.println("helloJoker");
-            if(sink()) {
+        if(h.getNlts() == h1.getNlts() && h.getLid() == h1.getLid()) {
+            //System.out.println("we've entered !");
+            if (sink()) {
                 Node m = null;
-                int flag=0;
-                for (Map.Entry<Integer, Node> entry : neighbors.entrySet())
-                {
-                    if(m == null)
+                int flag = 0;
+                for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
+                    if (m == null)
                         m = entry.getValue();
-                    if(((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(entry.getKey()).getNlts() == ((HashMap<Integer, Height>) m.getProperty("heights")).get(m.getID()).getNlts() && ((HashMap<Integer, Height>) m.getProperty("heights")).get(entry.getKey()).getLid() == ((HashMap<Integer, Height>) m.getProperty("heights")).get(m.getID()).getLid()) {
+                    if (((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(entry.getKey()).getNlts() == ((HashMap<Integer, Height>) m.getProperty("heights")).get(m.getID()).getNlts() && ((HashMap<Integer, Height>) m.getProperty("heights")).get(entry.getKey()).getLid() == ((HashMap<Integer, Height>) m.getProperty("heights")).get(m.getID()).getLid()) {
                         flag++;
                     }
                 }
-                if(flag == neighbors.size()) {
-                    if(heights.get(this.getID()).getTau() > 0 && heights.get(this.getID()).getR() == 0)
+                if (flag == neighbors.size()) {
+                    if (heights.get(this.getID()).getTau() > 0 && heights.get(this.getID()).getR() == 0)
                         reflectRefLevel(n);
-                    else if(heights.get(this.getID()).getTau() > 0 && heights.get(this.getID()).getR() == 0 && heights.get(this.getID()).getOid() == this.getID())
+                    else if (heights.get(this.getID()).getTau() > 0 && heights.get(this.getID()).getR() == 0 && heights.get(this.getID()).getOid() == this.getID())
                         electself();
                     else
                         startNewRefLevel();
                 } else
                     prograteLargestRefLevel();
-            } else
-                adoptLPIfPriority(n);
-            System.out.println("here we go ! : "+myOldHeight.toString() + "\n" + heights.get(this.getID()).toString());
-
-            if(myOldHeight != heights.get(this.getID())) {
-                System.out.println("here we go !");
-
-                HashMap<Integer, Node> union = new HashMap<>();
-                union.putAll(forming);
-                union.putAll(neighbors);
-                Message msg_1 = new Message(heights.get(this.getID()));
-                for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
-                    send(entry.getValue(), msg_1);
-                    System.out.println("here we go !");
-                }
             }
+            //System.out.println("Pay attention !!!!!!\n" + myOldHeight.toString() + '\n' + ((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID()).toString());
+            //System.out.println("here we go ! : " + myOldHeight.toString() + "\n" + heights.get(this.getID()).toString());
+            //System.out.println("Boolean result : " + Boolean.toString(myOldHeight.compareTo(((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID())) == 0));
 
+        } else
+            adoptLPIfPriority(n);
+        if (myOldHeight.compareTo(((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID())) != 0) {
+            System.out.println("Heath Ledger !");
+
+            HashMap<Integer, Node> union = new HashMap<>();
+            union.putAll(forming);
+            union.putAll(neighbors);
+            Message msg_1 = new Message(heights.get(this.getID()));
+            /*
+            for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
+                send(entry.getValue(), msg_1);
+
+                System.out.println("here we go !");
+            }*/
+            for(Node neighbor: this.getNeighbors()) {
+                send(neighbor, msg_1);
+            }
         }
+        //this.setColor(Color.BLUE);
         Label l = new Label("hello");
         this.setLabel(l);
     }
 
     public void electself() {
+        System.out.println("[+] Node : "+this.getID()+" executes ELECTSELF");
         HashMap<Integer, Height> heights = (HashMap<Integer, Height>)this.getProperty("heights");
         Height height = heights.get(this.getID());
         SubLeaderPair slp = (SubLeaderPair)this.getProperty("slp");
@@ -209,11 +223,13 @@ public class MyNode extends Node implements Comparable<Node> {
         lc.setLc(lc.getLc() + 1);
         this.setProperty("lc", lc);
         this.setProperty("slp", slp);
-        heights.put(this.getID(), height);
+        heights.replace(this.getID(), height);
         this.setProperty("heights", heights);
     }
 
     public void reflectRefLevel(Node n) {
+        System.out.println("[+] Node : "+this.getID()+" executes REFLECTREFLEVEL");
+
         HashMap<Integer, Height> heights = (HashMap<Integer, Height>)this.getProperty("heights");
         Height height = heights.get(this.getID());
         Height height_1 = heights.get(n.getID());
@@ -231,12 +247,14 @@ public class MyNode extends Node implements Comparable<Node> {
         lc.setLc(lc.getLc() + 1);
         this.setProperty("lc", lc);
         this.setProperty("slp", slp);
-        heights.put(this.getID(), height);
+        heights.replace(this.getID(), height);
         this.setProperty("heights", heights);
 
     }
 
     public void prograteLargestRefLevel() {
+        System.out.println("[+] Node : "+this.getID()+" executes PROPAGATELARGESTREFLEVEL");
+
         //List<Node> nodes = node.getNeighbors();
 
         HashMap<Integer, Node> neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
@@ -288,12 +306,14 @@ public class MyNode extends Node implements Comparable<Node> {
 
         this.setProperty("lc", lc);
         this.setProperty("slp", slp);
-        heights.put(this.getID(), height);
+        heights.replace(this.getID(), height);
         this.setProperty("heights", heights);
 
     }
 
     public void startNewRefLevel() {
+        System.out.println("[+] Node : "+this.getID()+" executes STARTNEWREFLEVEL");
+
         HashMap<Integer, Height> heights = (HashMap<Integer, Height>) this.getProperty("heights");
         Height height = heights.get(this.getID());
         SubLeaderPair slp = (SubLeaderPair)this.getProperty("slp");
@@ -307,12 +327,16 @@ public class MyNode extends Node implements Comparable<Node> {
         slp.setPred('?');
 
         lc.setLc(lc.getLc() + 1);
-
+        heights.replace(this.getID(), height);
+        this.setProperty("heights", heights);
         this.setProperty("slp", slp);
         this.setProperty("lc", lc);
     }
 
     public void adoptLPIfPriority(Node node) {
+        System.out.println("[+] Node : "+this.getID()+" executes ADOPTLPIFPRIORITY");
+
+        System.out.println("we've entered !---");
         Height height = ((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID());
         Height height_1 = ((HashMap<Integer, Height>) node.getProperty("heights")).get(node.getID());
 
@@ -327,11 +351,13 @@ public class MyNode extends Node implements Comparable<Node> {
             height.setLid(height_1.getLid());
         }
         HashMap<Integer, Height> heights = (HashMap<Integer, Height>) this.getProperty("heights");
-        heights.put(this.getID(), height);
+        heights.replace(this.getID(), height);
         this.setProperty("heights", heights);
     }
 
     public boolean sink() {
+        System.out.println("[+] SINK has been executed ELECTSELF");
+
         //Map.Entry<Integer, Height> minEntry = null;
         Height height = ((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID());
         HashMap<Integer, Node> neighbors = (HashMap<Integer, Node>) this.getProperty("neighbors");

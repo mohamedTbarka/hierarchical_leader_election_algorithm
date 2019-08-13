@@ -1,4 +1,4 @@
-import com.sun.scenario.effect.impl.sw.java.JSWBlend_HARD_LIGHTPeer;
+//import com.sun.scenario.effect.impl.sw.java.JSWBlend_HARD_LIGHTPeer;
 import io.jbotsim.core.Color;
 import io.jbotsim.core.Link;
 import io.jbotsim.core.Message;

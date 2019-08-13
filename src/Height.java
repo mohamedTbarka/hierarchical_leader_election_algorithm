@@ -1,6 +1,6 @@
 import io.jbotsim.core.Node;
 
-public class Height  {
+public class Height  implements Comparable<Height>{
     private int tau;
     private  int oid;
 
@@ -90,5 +90,46 @@ public class Height  {
     @Override
     public String toString() {
         return "Height = ("+this.tau+", "+this.oid+", "+this.r+", "+this.delta+", "+this.nlts+", "+this.lid+", ";
+    }
+    
+    @Override
+
+    public int compareTo(Height h2) {
+        if (this.getTau() > h2.getTau()) {
+            return 1;
+        } else if (this.getTau() < h2.getTau()) {
+            return -1;
+        } else {
+            if (this.getOid()> h2.getOid()) {
+                return 1;
+            } else if (this.getOid()< h2.getOid()) {
+                return -1;
+            } else {
+                if (this.getR() > h2.getR()) {
+                    return 1;
+                } else if (this.getR() < h2.getR()) {
+                    return -1;
+                } else {
+                    if (this.getDelta() > h2.getDelta()) {
+                        return 1;
+                    } else if (this.getDelta() < h2.getDelta()) {
+                        return -1;
+                    } else {
+                        if (this.getNlts() > h2.getNlts()) {
+                            return 1;
+                        } else if (this.getNlts() < h2.getNlts()) {
+                            return -1;
+                        } else {
+                            if (this.getLid() > h2.getLid()) {
+                                return 1;
+                            } else if (this.getLid() < h2.getLid()) {
+                                return -1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return 0;
     }
 }
