@@ -15,70 +15,25 @@ import java.util.Random;
  */
 
 public class MyNode extends Node implements Comparable<Node> {
-    //private boolean heardSomeone = false;
-    // here we gonna put the 7-tuple and the sub-leader pair.
-    //private Height height;
-    //private char id;
-    //private char slid;
-    //private char pred;
 
-    //private int lc;
-    //private boolean heightChanged;
-
-    //private HashMap<int, MyNode> neighbors;
-    //private HashMap<int, MyNode> forming;
-
-    //private HashMap<int, Height> heights;
-
-
-    /*
-    public MyNode(char id, HashMap<Character, Height> heights, char slid, char pred, int lc, int d) {
-
-        this.id = id;
-        this.slid = slid;
-        this.pred = pred;
-        this.lc = lc;
-        this.heights = new HashMap<Character, Height>();
-        this.heights=heights;
-        this.neighbors=neighbors = new HashMap<>();
-        this.forming=forming;
-
-        if(this.heights.get(this.id).getDelta() % d == 0)
-            this.setColor(Color.orange);
-    }
-
-    public MyNode() {
-        String alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        Random rnd = new Random();
-        char c = alphabet.charAt(rnd.nextInt(alphabet.length()));
-        this.id = c;
-        Height height = new Height(0, 0, 0, 0, -1, c, c);
-        neighbors = new HashMap<Character, MyNode>();
-        heights = new HashMap<Character, Height>();
-        this.heights.put(c, height);
-        MyNode n = new MyNode(c, this.heights, 'H', '?', 1, 2);
-        this.neighbors.put(c, n);
-        Label l = new Label("hello");
-        this.slid = c;
-        this.pred = '?';
-        this.setLabel(l);
-        System.out.println("hello");
-        System.out.println(this.heights.get(c).getDelta());
-    }*/
+    private HashMap<Integer, Node> forming = new HashMap<>();
+    private HashMap<Integer, Height> heights = new HashMap<>();
+    private HashMap<Integer, Node> neighbors = new HashMap<>();
+    private Height h;
+    private Height message;
+    private SubLeaderPair slp;
+    private LogicalClock lc;
 
     @Override
     public void onStart() {
         System.out.println("hello");
-        Height h = new Height(0, 0, 0,0, -1,this.getID());
+        h = new Height(0, 0, 0,0, -1,this.getID());
         SubLeaderPair slp = new SubLeaderPair(this.getID(), '?');
         LogicalClock lc = new LogicalClock(0);
         //this.setProperty("height", h);
         this.setProperty("slp", slp);
         this.setProperty("lc", lc);
-        HashMap<Integer, Node> neighbors= new HashMap<>();
-        HashMap<Integer, Node> forming= new HashMap<>();
 
-        HashMap<Integer, Height> heights = new HashMap<>();
         heights.put(this.getID(), h);
         this.setProperty("heights", heights);
         this.setProperty("neighbors", neighbors);
@@ -90,10 +45,10 @@ public class MyNode extends Node implements Comparable<Node> {
     }
     @Override
     public void setLabel(Object label) {
-        HashMap<Integer, Height> h = (HashMap<Integer, Height>)this.getProperty("heights");
-        SubLeaderPair slp = (SubLeaderPair) this.getProperty("slp");
-        LogicalClock lc = (LogicalClock) this.getProperty("lc");
-        super.setLabel(h.get(this.getID()).toString() + this.getID()+')'+slp.toString() + lc.toString());
+        heights = (HashMap<Integer, Height>)this.getProperty("heights");
+        slp = (SubLeaderPair) this.getProperty("slp");
+        lc = (LogicalClock) this.getProperty("lc");
+        super.setLabel(heights.get(this.getID()).toString() + this.getID()+')'+slp.toString() + lc.toString());
         //System.out.println(h.toString() + this.getID() +")" + slp.toString() + lc.toString());
         // super.setLabel("("+ this.heights.get(this.id).getTau()+ ", " + this.heights.get(this.id).getOid() + ", " + this.heights.get(this.id).getR() + ", " + this.heights.get(this.id).getDelta() + ", " + this.heights.get(this.id).getNlts() + ", " + this.heights.get(this.id).getLid() + ", " + this.heights.get(this.id).getId()+ ") - (" + this.slid + ", " + this.pred + ") - LC : " + this.lc);
     }
@@ -103,10 +58,10 @@ public class MyNode extends Node implements Comparable<Node> {
         //link.set;
         Node n = link.getOtherEndpoint(this);
         //MyNode nn = (MyNode) n;
-        HashMap<Integer, Node> forming = (HashMap<Integer, Node>) this.getProperty("forming");
-        HashMap<Integer, Height> heights = (HashMap<Integer, Height>) this.getProperty("heights");
+        forming = (HashMap<Integer, Node>) this.getProperty("forming");
+        heights = (HashMap<Integer, Height>) this.getProperty("heights");
 
-        Height h = heights.get(this.getID());
+        h = heights.get(this.getID());
 
         forming.put(n.getID(), n);
         this.setProperty("forming", forming);
@@ -125,35 +80,22 @@ public class MyNode extends Node implements Comparable<Node> {
         this.setColor(Color.getRandomColor());
         //System.out.println("We're at the level of node : "+this.getID());
 
-        Height h1 = (Height) msg.getContent();
+        message = (Height) msg.getContent();
         Node n = msg.getSender();
 
-        HashMap<Integer, Height> heights = (HashMap<Integer, Height>) this.getProperty("heights");
-        HashMap<Integer, Node> forming = (HashMap<Integer, Node>) this.getProperty("forming");
-        HashMap<Integer, Node> neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
+        heights = (HashMap<Integer, Height>) this.getProperty("heights");
+        forming = (HashMap<Integer, Node>) this.getProperty("forming");
+        neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
 
-        Height h = heights.get(this.getID());
-        //System.out.println(h.getId());
-        //MyNode n = (MyNode) msg.getSender();
-        MyNode oldNode = this;
-        //heights.put(n.getID(), h1);
+        h = heights.get(this.getID());
+
         forming.remove(n.getID());
 
         Height myOldHeight = h;
 
-        heights.replace(n.getID(), h1);
+        heights.replace(n.getID(), message);
 
-        //heights.put(this.getID(), h);
-        this.setProperty("heights", heights);
-        this.setProperty("forming", forming);
-        this.setProperty("neighbors", neighbors);
-
-        //heights = (HashMap<Integer, Height>) this.getProperty("heights");
-        //forming = (HashMap<Integer, Node>) this.getProperty("forming");
-        //neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
-        //h = heights.get(this.getID());
-
-        if(h.getNlts() == h1.getNlts() && h.getLid() == h1.getLid()) {
+        if(h.getNlts() == message.getNlts() && h.getLid() == message.getLid()) {
             //System.out.println("we've entered !");
             if (sink()) {
                 Node m = null;
@@ -175,9 +117,6 @@ public class MyNode extends Node implements Comparable<Node> {
                 } else
                     prograteLargestRefLevel();
             }
-            //System.out.println("Pay attention !!!!!!\n" + myOldHeight.toString() + '\n' + ((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID()).toString());
-            //System.out.println("here we go ! : " + myOldHeight.toString() + "\n" + heights.get(this.getID()).toString());
-            //System.out.println("Boolean result : " + Boolean.toString(myOldHeight.compareTo(((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID())) == 0));
 
         } else
             adoptLPIfPriority(n);
@@ -187,68 +126,65 @@ public class MyNode extends Node implements Comparable<Node> {
             HashMap<Integer, Node> union = new HashMap<>();
             union.putAll(forming);
             union.putAll(neighbors);
-            Message msg_1 = new Message(heights.get(this.getID()));
-            /*
+            Message msg_1 = new Message(h);
+
             for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
                 send(entry.getValue(), msg_1);
 
                 System.out.println("here we go !");
-            }*/
+            }
+            /*
             for(Node neighbor: this.getNeighbors()) {
                 send(neighbor, msg_1);
-            }
+            }*/
         }
         //this.setColor(Color.BLUE);
         Label l = new Label("hello");
         this.setLabel(l);
+        this.setProperty("lc", lc);
+        this.setProperty("slp", slp);
+        this.setProperty("heights", heights);
+        this.setProperty("neighbors", neighbors);
+        this.setProperty("forming", forming);
+
     }
 
     public void electself() {
         System.out.println("[+] Node : "+this.getID()+" executes ELECTSELF");
-        HashMap<Integer, Height> heights = (HashMap<Integer, Height>)this.getProperty("heights");
-        Height height = heights.get(this.getID());
-        SubLeaderPair slp = (SubLeaderPair)this.getProperty("slp");
-        LogicalClock lc = (LogicalClock)this.getProperty("lc");
+        heights = (HashMap<Integer, Height>)this.getProperty("heights");
+        h = heights.get(this.getID());
+        slp = (SubLeaderPair)this.getProperty("slp");
+        lc = (LogicalClock)this.getProperty("lc");
 
-        height.setTau(0);
-        height.setOid(0);
-        height.setR(0);
+        h.setTau(0);
+        h.setOid(0);
+        h.setR(0);
 
-        height.setNlts(lc.getLc());
-        height.setLid(this.getID());
+        h.setNlts(lc.getLc());
+        h.setLid(this.getID());
         slp.setSlid('?');
         slp.setPred('?');
 
         lc.setLc(lc.getLc() + 1);
         lc.setLc(lc.getLc() + 1);
-        this.setProperty("lc", lc);
-        this.setProperty("slp", slp);
-        heights.replace(this.getID(), height);
-        this.setProperty("heights", heights);
+        heights.replace(this.getID(), h);
     }
 
     public void reflectRefLevel(Node n) {
         System.out.println("[+] Node : "+this.getID()+" executes REFLECTREFLEVEL");
-
-        HashMap<Integer, Height> heights = (HashMap<Integer, Height>)this.getProperty("heights");
-        Height height = heights.get(this.getID());
-        Height height_1 = heights.get(n.getID());
-        SubLeaderPair slp = (SubLeaderPair)this.getProperty("slp");
-        LogicalClock lc = (LogicalClock)this.getProperty("lc");
-
-        height.setTau(height_1.getTau());
-        height.setOid(height_1.getOid());
-        height.setR(1);
-        height.setDelta(0);
+        slp = (SubLeaderPair)this.getProperty("slp");
+        lc = (LogicalClock)this.getProperty("lc");
+        int i = message.getTau();
+        h.setTau(i);
+        h.setOid(message.getOid());
+        h.setR(1);
+        h.setDelta(0);
 
         slp.setSlid('?');
         slp.setPred('?');
 
         lc.setLc(lc.getLc() + 1);
-        this.setProperty("lc", lc);
-        this.setProperty("slp", slp);
-        heights.replace(this.getID(), height);
-        this.setProperty("heights", heights);
+        heights.replace(this.getID(), h);
 
     }
 
@@ -257,13 +193,8 @@ public class MyNode extends Node implements Comparable<Node> {
 
         //List<Node> nodes = node.getNeighbors();
 
-        HashMap<Integer, Node> neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
         HashMap<Integer, Node> ns = (HashMap<Integer, Node>)this.getProperty("neighbors");
-        HashMap<Integer, Height> heights = (HashMap<Integer, Height>)this.getProperty("heights");
-        Height height = heights.get(this.getID());
 
-        SubLeaderPair slp = (SubLeaderPair)this.getProperty("slp");
-        LogicalClock lc = (LogicalClock)this.getProperty("lc");
 
         Map.Entry<Integer, Node> maxEntry = null;
 
@@ -275,14 +206,14 @@ public class MyNode extends Node implements Comparable<Node> {
             }
         }
 
-        height.setTau(((HashMap<Integer, Height>) maxEntry.getValue().getProperty("heights")).get(maxEntry.getKey()).getTau());
-        height.setOid(((HashMap<Integer, Height>) maxEntry.getValue().getProperty("heights")).get(maxEntry.getKey()).getOid());
+        h.setTau(((HashMap<Integer, Height>) maxEntry.getValue().getProperty("heights")).get(maxEntry.getKey()).getTau());
+        h.setOid(((HashMap<Integer, Height>) maxEntry.getValue().getProperty("heights")).get(maxEntry.getKey()).getOid());
 
         //Map.Entry<Integer, Height> minEntry = null;
 
         for (Map.Entry<Integer, Node> entry : ns.entrySet())
         {
-            if (height.getTau() != ((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(entry.getKey()).getTau() && height.getOid() != ((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(entry.getKey()).getOid() && height.getR() != ((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(entry.getKey()).getR())
+            if (h.getTau() != ((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(entry.getKey()).getTau() && h.getOid() != ((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(entry.getKey()).getOid() && h.getR() != ((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(entry.getKey()).getR())
             {
                 ns.remove(entry.getKey());
             }
@@ -298,74 +229,64 @@ public class MyNode extends Node implements Comparable<Node> {
             }
         }
 
-        height.setDelta(((HashMap<Integer, Height>) minEntry.getValue().getProperty("heights")).get(minEntry.getKey()).getDelta() - 1);
+        h.setDelta(((HashMap<Integer, Height>) minEntry.getValue().getProperty("heights")).get(minEntry.getKey()).getDelta() - 1);
         slp.setSlid('?');
         slp.setPred('?');
 
         lc.setLc(lc.getLc() + 1);
-
-        this.setProperty("lc", lc);
-        this.setProperty("slp", slp);
-        heights.replace(this.getID(), height);
-        this.setProperty("heights", heights);
-
+        heights.replace(this.getID(), h);
     }
 
     public void startNewRefLevel() {
         System.out.println("[+] Node : "+this.getID()+" executes STARTNEWREFLEVEL");
 
-        HashMap<Integer, Height> heights = (HashMap<Integer, Height>) this.getProperty("heights");
-        Height height = heights.get(this.getID());
-        SubLeaderPair slp = (SubLeaderPair)this.getProperty("slp");
-        LogicalClock lc = (LogicalClock)this.getProperty("lc");
-        height.setTau(lc.getLc());
-        height.setOid(this.getID());
-        height.setR(0);
-        height.setDelta(0);
+        heights = (HashMap<Integer, Height>) this.getProperty("heights");
+        h = heights.get(this.getID());
+        slp = (SubLeaderPair)this.getProperty("slp");
+        lc = (LogicalClock)this.getProperty("lc");
+        h.setTau(lc.getLc());
+        h.setOid(this.getID());
+        h.setR(0);
+        h.setDelta(0);
 
         slp.setSlid('?');
         slp.setPred('?');
 
         lc.setLc(lc.getLc() + 1);
-        heights.replace(this.getID(), height);
-        this.setProperty("heights", heights);
-        this.setProperty("slp", slp);
-        this.setProperty("lc", lc);
+        heights.replace(this.getID(), h);
+
     }
 
-    public void adoptLPIfPriority(Node node) {
+    public void adoptLPIfPriority(Node n) {
         System.out.println("[+] Node : "+this.getID()+" executes ADOPTLPIFPRIORITY");
 
         System.out.println("we've entered !---");
-        Height height = ((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID());
-        Height height_1 = ((HashMap<Integer, Height>) node.getProperty("heights")).get(node.getID());
+        //Height height = ((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID());
 
-        if (height_1.getNlts() < height.getNlts()|| height_1.getNlts() == height.getNlts() && height_1.getLid() < height.getLid()) {
-            height.setTau(height_1.getTau());
-            height.setOid(height_1.getOid());
-            height.setR(height_1.getR());
+        //Height height_1 = ((HashMap<Integer, Height>) node.getProperty("heights")).get(node.getID());
 
-            height.setDelta(height_1.getDelta() + 1);
+        if (message.getNlts() < h.getNlts()|| message.getNlts() == h.getNlts() && message.getLid() < h.getLid()) {
+            h.setTau(message.getTau());
+            h.setOid(message.getOid());
+            h.setR(message.getR());
 
-            height.setNlts(height_1.getNlts());
-            height.setLid(height_1.getLid());
+            h.setDelta(message.getDelta() + 1);
+
+            h.setNlts(message.getNlts());
+            h.setLid(message.getLid());
         }
-        HashMap<Integer, Height> heights = (HashMap<Integer, Height>) this.getProperty("heights");
-        heights.replace(this.getID(), height);
-        this.setProperty("heights", heights);
+        heights.replace(this.getID(), h);
     }
 
     public boolean sink() {
-        System.out.println("[+] SINK has been executed ELECTSELF");
+        System.out.println("[+] SINK has been executed !");
 
         //Map.Entry<Integer, Height> minEntry = null;
-        Height height = ((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID());
-        HashMap<Integer, Node> neighbors = (HashMap<Integer, Node>) this.getProperty("neighbors");
         for (Map.Entry<Integer, Node> entry : neighbors.entrySet())
         {
             //HashMap<Integer, Height> hs = (HashMap<Integer, Height>)entry.getValue().getProperty("heights");
             Height height1 = ((HashMap<Integer, Height>)entry.getValue().getProperty("heights")).get(this.getID());
-            if (height1.getNlts() != height.getNlts() ||  this.compareTo(entry.getValue()) != -1 || height.getLid() != this.getID())
+            if (height1.getNlts() != h.getNlts() ||  this.compareTo(entry.getValue()) != -1 || h.getLid() != this.getID())
             {
                 return false;
             }
