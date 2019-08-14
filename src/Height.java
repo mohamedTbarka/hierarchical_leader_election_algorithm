@@ -4,6 +4,16 @@ public class Height  implements Comparable<Height>{
     private int tau;
     private  int oid;
 
+    public Height(Height h) {
+        this.tau = h.getTau();
+        this.oid = h.getOid();
+        this.r = h.getR();
+        this.delta = h.getDelta();
+        this.nlts = h.getNlts();
+        this.lid = h.getLid();
+    }
+
+
     public Height(int tau, int oid, int r, int delta, int nlts, int lid) {
         this.tau = tau;
         this.oid = oid;

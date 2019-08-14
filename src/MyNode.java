@@ -23,6 +23,8 @@ public class MyNode extends Node implements Comparable<Node> {
     private Height message;
     private SubLeaderPair slp;
     private LogicalClock lc;
+    private final int D = 2;
+    private Height myOldHeight;
 
     @Override
     public void onStart() {
@@ -41,6 +43,7 @@ public class MyNode extends Node implements Comparable<Node> {
 
         Label l = new Label("hello");
         this.setLabel(l);
+
 
     }
     @Override
@@ -91,35 +94,50 @@ public class MyNode extends Node implements Comparable<Node> {
 
         forming.remove(n.getID());
 
-        Height myOldHeight = h;
+        neighbors.put(n.getID(), n);
+
+        myOldHeight = new Height(h);
+        System.out.println(myOldHeight);
 
         heights.replace(n.getID(), message);
 
         if(h.getNlts() == message.getNlts() && h.getLid() == message.getLid()) {
             //System.out.println("we've entered !");
+            System.out.println(neighbors.size());
             if (sink()) {
                 Node m = null;
                 int flag = 0;
                 for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
                     if (m == null)
                         m = entry.getValue();
-                    if (((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(entry.getKey()).getNlts() == ((HashMap<Integer, Height>) m.getProperty("heights")).get(m.getID()).getNlts() && ((HashMap<Integer, Height>) m.getProperty("heights")).get(entry.getKey()).getLid() == ((HashMap<Integer, Height>) m.getProperty("heights")).get(m.getID()).getLid()) {
+                    if (h.getNlts() == ((HashMap<Integer, Height>) m.getProperty("heights")).get(m.getID()).getNlts() && h.getLid() == ((HashMap<Integer, Height>) m.getProperty("heights")).get(m.getID()).getLid()) {
                         flag++;
                     }
                 }
                 if (flag == neighbors.size()) {
-                    if (heights.get(this.getID()).getTau() > 0 && heights.get(this.getID()).getR() == 0)
+                    if (h.getTau() > 0 && h.getR() == 0)
                         reflectRefLevel(n);
-                    else if (heights.get(this.getID()).getTau() > 0 && heights.get(this.getID()).getR() == 0 && heights.get(this.getID()).getOid() == this.getID())
+                    else if (h.getTau() > 0 && h.getR() == 0 && h.getOid() == this.getID())
                         electself();
                     else
                         startNewRefLevel();
                 } else
                     prograteLargestRefLevel();
-            }
+            } else
+                System.out.println("[+] nothin' has been done !");
 
         } else
             adoptLPIfPriority(n);
+
+        Label l = new Label("hello");
+        this.setLabel(l);
+        this.setProperty("lc", lc);
+        this.setProperty("slp", slp);
+        this.setProperty("heights", heights);
+        this.setProperty("neighbors", neighbors);
+        this.setProperty("forming", forming);
+        System.out.println(myOldHeight);
+        System.out.println(((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID()));
         if (myOldHeight.compareTo(((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID())) != 0) {
             System.out.println("Heath Ledger !");
 
@@ -139,13 +157,17 @@ public class MyNode extends Node implements Comparable<Node> {
             }*/
         }
         //this.setColor(Color.BLUE);
-        Label l = new Label("hello");
-        this.setLabel(l);
-        this.setProperty("lc", lc);
-        this.setProperty("slp", slp);
-        this.setProperty("heights", heights);
-        this.setProperty("neighbors", neighbors);
-        this.setProperty("forming", forming);
+        /*
+        for(Node node : this.getNeighbors()) {
+            Link link = this.getCommonLinkWith(node);
+            if(this.compareTo(node) == 1) {
+                //Link l = new Link(this, node, Link.Type.DIRECTED);
+                link.setColor(Color.GREEN);
+            }
+            else
+                link.setColor(Color.RED);
+        }*/
+
 
     }
 
@@ -239,6 +261,7 @@ public class MyNode extends Node implements Comparable<Node> {
 
     public void startNewRefLevel() {
         System.out.println("[+] Node : "+this.getID()+" executes STARTNEWREFLEVEL");
+        System.out.println(neighbors.size());
 
         heights = (HashMap<Integer, Height>) this.getProperty("heights");
         h = heights.get(this.getID());
@@ -275,21 +298,25 @@ public class MyNode extends Node implements Comparable<Node> {
             h.setNlts(message.getNlts());
             h.setLid(message.getLid());
         }
+        System.out.println("[+] "+myOldHeight);
         heights.replace(this.getID(), h);
+        System.out.println("[+] "+myOldHeight);
+
+        lc.setLc(lc.getLc() + 1);
+        System.out.println(neighbors.size());
     }
 
     public boolean sink() {
         System.out.println("[+] SINK has been executed !");
 
-        //Map.Entry<Integer, Height> minEntry = null;
         for (Map.Entry<Integer, Node> entry : neighbors.entrySet())
         {
-            //HashMap<Integer, Height> hs = (HashMap<Integer, Height>)entry.getValue().getProperty("heights");
-            Height height1 = ((HashMap<Integer, Height>)entry.getValue().getProperty("heights")).get(this.getID());
-            if (height1.getNlts() != h.getNlts() ||  this.compareTo(entry.getValue()) != -1 || h.getLid() != this.getID())
-            {
+            Height height1 = ((HashMap<Integer, Height>)entry.getValue().getProperty("heights")).get(entry.getValue().getID());
+            System.out.println(h);
+            System.out.println(height1);
+            System.out.println(this.compareTo(entry.getValue()) == -1);
+            if (height1.getNlts() != h.getNlts() || height1.getLid() != h.getLid() ||  this.compareTo(entry.getValue()) == 1 || h.getLid() == this.getID())
                 return false;
-            }
         }
         return true;
     }
@@ -339,37 +366,37 @@ public class MyNode extends Node implements Comparable<Node> {
 
     @Override
     public int compareTo(Node node) {
-        Height h1 = ((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID());
+
         Height h2 = ((HashMap<Integer, Height>) node.getProperty("heights")).get(node.getID());
 
-        if (h1.getTau() > h2.getTau()) {
+        if (h.getTau() > h2.getTau()) {
             return 1;
-        } else if (h1.getTau() < h2.getTau()) {
+        } else if (h.getTau() < h2.getTau()) {
             return -1;
         } else {
-            if (h1.getOid()> h2.getOid()) {
+            if (h.getOid()> h2.getOid()) {
                 return 1;
-            } else if (h1.getOid()< h2.getOid()) {
+            } else if (h.getOid()< h2.getOid()) {
                 return -1;
             } else {
-                if (h1.getR() > h2.getR()) {
+                if (h.getR() > h2.getR()) {
                     return 1;
-                } else if (h1.getR() < h2.getR()) {
+                } else if (h.getR() < h2.getR()) {
                     return -1;
                 } else {
-                    if (h1.getDelta() > h2.getDelta()) {
+                    if (h.getDelta() > h2.getDelta()) {
                         return 1;
-                    } else if (h1.getDelta() < h2.getDelta()) {
+                    } else if (h.getDelta() < h2.getDelta()) {
                         return -1;
                     } else {
-                        if (h1.getNlts() > h2.getNlts()) {
+                        if (h.getNlts() > h2.getNlts()) {
                             return 1;
-                        } else if (h1.getNlts() < h2.getNlts()) {
+                        } else if (h.getNlts() < h2.getNlts()) {
                             return -1;
                         } else {
-                            if (h1.getLid() > h2.getLid()) {
+                            if (h.getLid() > h2.getLid()) {
                                 return 1;
-                            } else if (h1.getLid() < h2.getLid()) {
+                            } else if (h.getLid() < h2.getLid()) {
                                 return -1;
                             } else {
                                 if (this.getID()> node.getID()) {
