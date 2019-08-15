@@ -11,9 +11,7 @@ public class MessagePassing{
     public static void main(String[] args) {
         Topology tp = new Topology();
         tp.setDefaultNodeModel(MyNode.class);
-        tp.setTimeUnit(500);
-        tp.addNode(10, 10);
-        tp.addNode(100, 100);
+        tp.setTimeUnit(1000);
         JViewer jv = new JViewer (tp);
         jv.getJTopology().addBackgroundPainter(new MyBackgroundPainter());
         tp.start();
