@@ -74,15 +74,19 @@ public class MyNode extends Node implements Comparable<Node> {
         Message message = new Message(h);
         send(n, message);
         HashMap<Integer, Node> f = (HashMap<Integer, Node>) this.getProperty("forming");
-
+        link.setColor(Color.RED);
         System.out.println("[+] node "+this.getID()+" has made contact with node : "+f.get(n.getID()).getID());
+
     }
 
     @Override
 
     public void onMessage(Message msg) {
 
-        this.setColor(Color.getRandomColor());
+
+        boolean f = true;
+
+        //this.setColor(Color.getRandomColor());
         System.out.println("We're at the level of node : "+this.getID());
 
         message = (Height) msg.getContent();
@@ -97,9 +101,11 @@ public class MyNode extends Node implements Comparable<Node> {
 
         forming.remove(n.getID());
 
+
         neighbors.put(n.getID(), n);
 
         myOldHeight = new Height(h);
+        this.getCommonLinkWith(n).setColor(null);
         // System.out.println(myOldHeight);
 
         heights.replace(n.getID(), message);
@@ -107,6 +113,9 @@ public class MyNode extends Node implements Comparable<Node> {
         // System.out.println("[+] current height : "+h);
         // System.out.print("[+] message received : "+message);
 
+        System.out.println("[+] current height : "+h);
+
+        System.out.println("[+] current message : "+message+" from node "+n.getID());
 
         if(h.getNlts() == message.getNlts() && h.getLid() == message.getLid()) {
             //System.out.println("we've entered !");
@@ -128,28 +137,37 @@ public class MyNode extends Node implements Comparable<Node> {
                 }
                 // System.out.println(flag);
                 if (flag == neighbors.size()-1) {
-                    if (m.getTau() > 0 && m.getR() == 0)
+                    if (m.getTau() > 0 && m.getR() == 0) {
                         reflectRefLevel(n);
+                        this.setColor(null);
+
+                    }
                     else if (m.getTau() > 0 && m.getR() == 1 && m.getOid() == this.getID())
                         electself();
-                    else
+                    else {
                         startNewRefLevel();
-                } else
+                        this.setColor(null);
+
+                    }
+                } else {
                     prograteLargestRefLevel();
+                    this.setColor(null);
+                }
             } else
                 System.out.println("[+] node "+this.getID()+" has done nothing !");
 
-        } else
+        } else {
             adoptLPIfPriority(n);
-
+            f=false;
+            if(h.getDelta() % D == 0 && h.getDelta() != 0)
+                this.setColor(Color.GREEN);
+        }
         if(h.getLid() == this.getID())
             this.setColor(Color.RED);
-        else
-            this.setColor(null);
 
 
-        if(h.getDelta() % D == 0 && h.getDelta() != 0)
-            this.setColor(Color.GREEN);
+
+
 
         Label l = new Label("hello");
         this.setLabel(l);
@@ -169,6 +187,10 @@ public class MyNode extends Node implements Comparable<Node> {
         if (myOldHeight.compareTo(h) != 0) {
             // System.out.println("Heath Ledger !");
 
+            if(this.getID() != h.getLid() &&
+                    h.getDelta() % D != 0 && h.getDelta() != 0)
+                this.setColor(null);
+
             HashMap<Integer, Node> union = new HashMap<>();
             union.putAll(forming);
             union.putAll(neighbors);
@@ -176,7 +198,8 @@ public class MyNode extends Node implements Comparable<Node> {
 
             for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
                 send(entry.getValue(), msg_1);
-
+                if(f)
+                    this.getCommonLinkWith(entry.getValue()).setWidth(1);
                 // System.out.println("here we go !");
             }
             /*
@@ -351,7 +374,8 @@ public class MyNode extends Node implements Comparable<Node> {
         SubLeaderPair nslp = ((SubLeaderPair) n.getProperty("slp"));
         // System.out.println(message);
 
-        if (message.getNlts() < h.getNlts() || message.getNlts() == h.getNlts() && message.getLid() < h.getLid()) {
+
+        if (message.getNlts() < h.getNlts() || message.getNlts() == h.getNlts() && message.getLid() < h.getLid() || message.getNlts() == h.getNlts() && message.getLid() == h.getLid() && n.getID() < slp.getPred()) {
             h.setTau(message.getTau());
             h.setOid(message.getOid());
             h.setR(message.getR());
@@ -360,6 +384,29 @@ public class MyNode extends Node implements Comparable<Node> {
 
             h.setNlts(message.getNlts());
             h.setLid(message.getLid());
+            if (message.getDelta() % D != 0 && message.getDelta() != 0) {
+                slp.setSlid(nslp.getSlid());
+                slp.setPred(n.getID());
+                System.out.println("[+] delta is not kD");
+
+            } else if (message.getDelta() == 0) {
+                slp.setSlid(n.getID());
+                slp.setPred(n.getID());
+                System.out.println("[+] delta is 0");
+                System.out.println(n.getID());
+            } else {
+                slp.setPred(n.getID());
+                slp.setSlid(n.getID());
+                System.out.println("[+] delta is kD");
+            }
+            Link l = this.getCommonLinkWith(n);
+            l.setWidth(3);
+            for(Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
+                if(n.getID() != entry.getValue().getID()) {
+                    this.getCommonLinkWith(entry.getValue()).setWidth(1);
+                    System.out.println("hello");
+                }
+            }
         }
         // System.out.println("[+] "+myOldHeight);
         heights.replace(this.getID(), h);
@@ -369,26 +416,51 @@ public class MyNode extends Node implements Comparable<Node> {
         else
             lc.setLc(nlc + 1);
         System.out.println("[+] current message : "+message);
+/*
+        Node minEntry = null;
 
-        if (message.getDelta() % D != 0) {
-            slp.setSlid(nslp.getSlid());
-            slp.setPred(n.getID());
+        Height hn = ((HashMap<Integer, Height>)n.getProperty("heights")).get(n.getID());
+        System.out.println("We're in the min loop !");
+        for (Map.Entry<Integer, Node> entry : neighbors.entrySet())
+        {
+            Height hentry = ((HashMap<Integer, Height>)entry.getValue().getProperty("heights")).get(entry.getValue().getID());
+            SubLeaderPair slpentry = ((SubLeaderPair)entry.getValue().getProperty("slp"));
+
+            System.out.println(hentry);
+
+            if(hentry.getDelta() != hn.getDelta())
+                continue;
+
+            if (minEntry == null && hentry.getDelta() == hn.getDelta() || entry.getValue().compareTo(minEntry) == -1  && hn.getDelta() == hentry.getDelta())
+            {
+
+                minEntry = entry.getValue();
+            }
+        }*/
+
+
+        /*
+        SubLeaderPair minslp = ((SubLeaderPair)minEntry.getProperty("slp"));
+
+        System.out.println("[+] the min entry : "+minEntry.getID());
+
+
+        if (message.getDelta() % D != 0 && message.getDelta() != 0) {
+            slp.setSlid(minslp.getSlid());
+            slp.setPred(minEntry.getID());
             System.out.println("[+] delta is not kD");
 
         } else if (message.getDelta() == 0) {
-            slp.setSlid(n.getID());
-            slp.setPred(n.getID());
+            slp.setSlid(minEntry.getID());
+            slp.setPred(minEntry.getID());
             System.out.println("[+] delta is 0");
+            System.out.println(minEntry.getID());
         } else {
-            slp.setPred(n.getID());
-            slp.setSlid(n.getID());
+            slp.setPred(minEntry.getID());
+            slp.setSlid(minEntry.getID());
             System.out.println("[+] delta is kD");
 
-        }
-
-        Link l = this.getCommonLinkWith(n);
-        l.setWidth(3);
-
+        }*/
 
 
 
@@ -416,6 +488,8 @@ public class MyNode extends Node implements Comparable<Node> {
         heights = (HashMap<Integer, Height>) this.getProperty("heights");
         forming = (HashMap<Integer, Node>) this.getProperty("forming");
         neighbors = (HashMap<Integer, Node>)this.getProperty("neighbors");
+        slp = (SubLeaderPair)this.getProperty("slp");
+        lc = (LogicalClock)this.getProperty("lc");
         h = heights.get(this.getID());
         // System.out.println("hello");
         Node n = link.getOtherEndpoint(this);
@@ -443,7 +517,45 @@ public class MyNode extends Node implements Comparable<Node> {
                 Message message = new Message(h);
                 send(entry.getValue(), message);
             }
+        } else if(slp.getPred() == n.getID() && slp.getSlid() != n.getID()) {
+            Node minEntry = null;
+
+            Height hn = ((HashMap<Integer, Height>)n.getProperty("heights")).get(n.getID());
+
+            for (Map.Entry<Integer, Node> entry : neighbors.entrySet())
+            {
+                Height hentry = ((HashMap<Integer, Height>)entry.getValue().getProperty("heights")).get(n.getID());
+
+                if (minEntry == null || entry.getValue().compareTo(minEntry) == -1 && hn.getDelta() == hentry.getDelta())
+                {
+                    minEntry = entry.getValue();
+                }
+            }
+
+            slp.setSlid(((SubLeaderPair)minEntry.getProperty("slp")).getSlid());
+            slp.setPred(minEntry.getID());
+            this.getCommonLinkWith(minEntry).setWidth(3);
+        } else if(slp.getPred() == n.getID() && slp.getSlid() == n.getID() && h.getLid() != n.getID()) {
+            Node minEntry = null;
+
+            Height hn = ((HashMap<Integer, Height>)n.getProperty("heights")).get(n.getID());
+
+            for (Map.Entry<Integer, Node> entry : neighbors.entrySet())
+            {
+                Height hentry = ((HashMap<Integer, Height>)entry.getValue().getProperty("heights")).get(n.getID());
+
+                if (minEntry == null || entry.getValue().compareTo(minEntry) == -1 && hn.getDelta() == hentry.getDelta())
+                {
+                    minEntry = entry.getValue();
+                }
+            }
+
+            slp.setSlid(minEntry.getID());
+            slp.setPred(minEntry.getID());
+            this.getCommonLinkWith(minEntry).setWidth(3);
         }
+
+
         if(h.getLid() == this.getID())
             this.setColor(Color.RED);
         else
