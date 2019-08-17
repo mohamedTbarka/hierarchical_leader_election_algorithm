@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="hierarchical_algorithm">
+    <output-path>$PROJECT_DIR$/out/artifacts/hierarchical_algorithm</output-path>
+    <root id="root">
+      <element id="archive" name="hierarchical_algorithm.jar">
+        <element id="module-output" name="hierarchical_algorithm" />
+      </element>
+    </root>
+  </artifact>
+</component>

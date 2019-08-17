@@ -1,0 +1,20 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="hierarchical_algorithm:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/hierarchical_algorithm_jar</output-path>
+    <root id="archive" name="hierarchical_algorithm.jar">
+      <element id="module-output" name="hierarchical_algorithm" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jbotsim-all-1.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jbotsim-extras-swing-1.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jbotsim-ui-swing-1.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jbotsim-core-1.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jbotsim-serialization-common-1.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/digraph-parser-1.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/antlr4-runtime-4.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/org.abego.treelayout.core-1.0.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/antlr4-annotations-4.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jbotsim-ui-common-1.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jbotsim-extras-common-1.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jbotsim-icons-1.0.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
