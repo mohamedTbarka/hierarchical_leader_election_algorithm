@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class MyNode extends Node implements Comparable<Node> {
     private boolean hc = false ;
-    private int ms = 0;
+    //private int nr;
     private HashMap<Integer, Node> forming = new HashMap<>();
     private HashMap<Integer, Height> heights = new HashMap<>();
     private HashMap<Integer, Node> neighbors = new HashMap<>();
@@ -28,7 +28,7 @@ public class MyNode extends Node implements Comparable<Node> {
 
 
     private int nlc;
-    /*
+/*
         public MyNode() {
             h = new Height(0, 0, 0,0, -1,this.getID());
             SubLeaderPair slp = new SubLeaderPair(this.getID(), -1);
@@ -62,6 +62,8 @@ public class MyNode extends Node implements Comparable<Node> {
         this.setProperty("neighbors", neighbors);
         this.setProperty("forming", forming);
         this.setProperty("hc", hc);
+        int nr = 0;
+        this.setProperty("nr", nr);
 
         Label l = new Label("hello");
         this.setLabel(l);
@@ -92,7 +94,8 @@ public class MyNode extends Node implements Comparable<Node> {
         //this.forming.put(Integer.toString(n.getID()).charAt(0), (MyNode)n);
         Message message = new Message(h);
         send(n, message);
-        ms++;
+
+        //this.setProperty("ms", ms);
         HashMap<Integer, Node> f = (HashMap<Integer, Node>) this.getProperty("forming");
         //link.setColor(Color.RED);
         System.out.println("[+] node "+this.getID()+" has made contact with node : "+f.get(n.getID()).getID());
@@ -104,6 +107,7 @@ public class MyNode extends Node implements Comparable<Node> {
     public void onMessage(Message msg) {
 
 
+
         boolean f = true;
 
         //this.setColor(Color.getRandomColor());
@@ -111,6 +115,10 @@ public class MyNode extends Node implements Comparable<Node> {
 
         message = (Height) msg.getContent();
         Node n = msg.getSender();
+
+        int nr = ((Integer) n.getProperty("nr"));
+        this.setProperty("nr", ++nr);
+
         nlc = ((LogicalClock)n.getProperty("lc")).getLc();
 
         heights = (HashMap<Integer, Height>) this.getProperty("heights");
@@ -232,7 +240,7 @@ public class MyNode extends Node implements Comparable<Node> {
                 // System.out.println("here we go !");
 
             }
-            ms++;
+
             /*
             for(Node neighbor: this.getNeighbors()) {
                 send(neighbor, msg_1);
@@ -254,6 +262,7 @@ public class MyNode extends Node implements Comparable<Node> {
     }
 
     public void electself() {
+        System.out.println("time: " + System.currentTimeMillis());
         hc=true;
         this.setProperty("hc", hc);
 
@@ -554,7 +563,7 @@ public class MyNode extends Node implements Comparable<Node> {
             for (Map.Entry<Integer, Node> entry : forming.entrySet()) {
                 send(entry.getValue(), message);
             }
-            ms++;
+
 
         } else if (sink()) {
             startNewRefLevel();
@@ -568,7 +577,7 @@ public class MyNode extends Node implements Comparable<Node> {
                 Message message = new Message(h);
                 send(entry.getValue(), message);
             }
-            ms++;
+
         } else if (slp.getPred() == n.getID() && slp.getSlid() != n.getID()) {
             Node minEntry = null;
 
