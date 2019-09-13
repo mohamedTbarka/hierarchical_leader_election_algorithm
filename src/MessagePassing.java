@@ -1,4 +1,5 @@
 
+import io.jbotsim.core.Link;
 import io.jbotsim.core.Node;
 import io.jbotsim.core.Topology;
 import io.jbotsim.ui.JTopology;
@@ -7,10 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.List;
 import java.util.Random;
 
@@ -105,10 +103,21 @@ public class MessagePassing implements ActionListener {
 
             button_1.doClick();
             button.doClick();
-            tp.pause();
-            for(Node n : tp.getNodes())
+            // tp.setDefaultNodeModel(Node.class);
+            // tp.disableWireless();
+
+
+            for(Node n : tp.getNodes()) {
+                n.setProperty("tpCleaning", true);
+            }
+
+
+            for(Node n : tp.getNodes()) {
                 tp.removeNode(n);
-            tp.start();
+            }
+
+
+            //tp.setDefaultNodeModel(MyNode.class);
         }
 
 
@@ -176,13 +185,22 @@ public class MessagePassing implements ActionListener {
 
         }
         try {
-            PrintWriter writer = new PrintWriter("performance.txt", "UTF-8");
-            writer.println("tolal number of nodes : " + i + ", sensitivity : " + nhc + ", latency : " + nr);
-            writer.close();
+            File f = new File("performance.txt");
+            if(!f.exists()) {
+                PrintWriter writer = new PrintWriter("performance.txt", "UTF-8");
+                writer.println("tolal number of nodes : " + i + ", sensitivity : " + nhc + ", latency : " + nr);
+                writer.close();
+            } else {
+                BufferedWriter output = new BufferedWriter(new FileWriter("performance.txt", true));
+                output.write("tolal number of nodes : " + i + ", sensitivity : " + nhc + ", latency : " + nr);
+                output.close();
+            }
 
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
 

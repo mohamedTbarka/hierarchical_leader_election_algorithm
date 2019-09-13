@@ -62,6 +62,7 @@ public class MyNode extends Node implements Comparable<Node> {
         this.setProperty("neighbors", neighbors);
         this.setProperty("forming", forming);
         this.setProperty("hc", hc);
+        this.setProperty("tpCleaning", false);
         int nr = 0;
         this.setProperty("nr", nr);
 
@@ -211,6 +212,7 @@ public class MyNode extends Node implements Comparable<Node> {
         this.setProperty("heights", heights);
         this.setProperty("neighbors", neighbors);
         this.setProperty("forming", forming);
+
         // System.out.println(myOldHeight);
         // System.out.println(((HashMap<Integer, Height>) this.getProperty("heights")).get(this.getID()));
 
@@ -454,11 +456,13 @@ public class MyNode extends Node implements Comparable<Node> {
                 slp.setPred(n.getID());
                 System.out.println("[+] delta is 0");
                 System.out.println(n.getID());
+
             } else {
                 slp.setPred(n.getID());
                 slp.setSlid(n.getID());
                 System.out.println("[+] delta is kD");
             }
+
             Link l = this.getCommonLinkWith(n);
             l.setWidth(3);
             for(Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
@@ -545,86 +549,102 @@ public class MyNode extends Node implements Comparable<Node> {
 
     @Override
     public void onLinkRemoved(Link link) {
-        System.out.println("[+] one of node's " + this.getID() + " links has gone down !");
-        heights = (HashMap<Integer, Height>) this.getProperty("heights");
-        forming = (HashMap<Integer, Node>) this.getProperty("forming");
-        neighbors = (HashMap<Integer, Node>) this.getProperty("neighbors");
-        slp = (SubLeaderPair) this.getProperty("slp");
-        lc = (LogicalClock) this.getProperty("lc");
-        h = heights.get(this.getID());
-        // System.out.println("hello");
-        Node n = link.getOtherEndpoint(this);
-        forming.remove(n.getID());
-        neighbors.remove(n.getID());
-        if (neighbors.size() == 0) {
-            electself();
-            Message message = new Message(h);
 
-            for (Map.Entry<Integer, Node> entry : forming.entrySet()) {
-                send(entry.getValue(), message);
-            }
+        if(!(boolean) this.getProperty("tpCleaning")) {
 
-
-        } else if (sink()) {
-            startNewRefLevel();
-            HashMap<Integer, Node> union = new HashMap<>();
-
-            union.putAll(forming);
-            union.putAll(neighbors);
-
-            for (Map.Entry<Integer, Node> entry : union.entrySet()) {
-                // System.out.println("Joker - "+h);
+            System.out.println("[+] one of node's " + this.getID() + " links has gone down !");
+            heights = (HashMap<Integer, Height>) this.getProperty("heights");
+            forming = (HashMap<Integer, Node>) this.getProperty("forming");
+            neighbors = (HashMap<Integer, Node>) this.getProperty("neighbors");
+            slp = (SubLeaderPair) this.getProperty("slp");
+            lc = (LogicalClock) this.getProperty("lc");
+            h = heights.get(this.getID());
+            // System.out.println("hello");
+            Node n = link.getOtherEndpoint(this);
+            forming.remove(n.getID());
+            neighbors.remove(n.getID());
+            if (neighbors.size() == 0) {
+                electself();
                 Message message = new Message(h);
-                send(entry.getValue(), message);
-            }
 
-        } else if (slp.getPred() == n.getID() && slp.getSlid() != n.getID()) {
-            Node minEntry = null;
-
-            Height hn = ((HashMap<Integer, Height>) n.getProperty("heights")).get(n.getID());
-
-            for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
-                Height hentry = ((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(n.getID());
-
-                if (minEntry == null || entry.getValue().compareTo(minEntry) == -1 && hn.getDelta() == hentry.getDelta()) {
-                    minEntry = entry.getValue();
+                for (Map.Entry<Integer, Node> entry : forming.entrySet()) {
+                    send(entry.getValue(), message);
                 }
-            }
 
-            slp.setSlid(((SubLeaderPair) minEntry.getProperty("slp")).getSlid());
-            slp.setPred(minEntry.getID());
-            this.getCommonLinkWith(minEntry).setWidth(3);
-        } else if (slp.getPred() == n.getID() && slp.getSlid() == n.getID() && h.getLid() != n.getID()) {
-            Node minEntry = null;
 
-            Height hn = ((HashMap<Integer, Height>) n.getProperty("heights")).get(n.getID());
+            } else if (sink()) {
+                startNewRefLevel();
+                HashMap<Integer, Node> union = new HashMap<>();
 
-            for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
-                Height hentry = ((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(n.getID());
+                union.putAll(forming);
+                union.putAll(neighbors);
 
-                if (minEntry == null || entry.getValue().compareTo(minEntry) == -1 && hn.getDelta() == hentry.getDelta()) {
-                    minEntry = entry.getValue();
+                for (Map.Entry<Integer, Node> entry : union.entrySet()) {
+                    // System.out.println("Joker - "+h);
+                    Message message = new Message(h);
+                    send(entry.getValue(), message);
                 }
+
+            } else if (slp.getPred() == n.getID() && slp.getSlid() != n.getID()) {
+                Node minEntry = null;
+
+                Height hn = ((HashMap<Integer, Height>) n.getProperty("heights")).get(n.getID());
+
+                for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
+
+                    Height hentry = ((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(n.getID());
+                    System.out.println("[+] we're at the level of node : " + this.getID());
+                    System.out.println(minEntry);
+                    System.out.println(entry);
+                    System.out.println(hentry);
+                    if (minEntry == null || entry.getValue().compareTo(minEntry) == -1 && hn.getDelta() == hentry.getDelta()) {
+                        minEntry = entry.getValue();
+                    }
+
+                }
+
+                slp.setSlid(((SubLeaderPair) minEntry.getProperty("slp")).getSlid());
+                slp.setPred(minEntry.getID());
+                this.getCommonLinkWith(minEntry).setWidth(3);
+
+            } else if (slp.getPred() == n.getID() && slp.getSlid() == n.getID() && h.getLid() != n.getID()) {
+                Node minEntry = null;
+
+                Height hn = ((HashMap<Integer, Height>) n.getProperty("heights")).get(n.getID());
+
+                for (Map.Entry<Integer, Node> entry : neighbors.entrySet()) {
+
+                    Height hentry = ((HashMap<Integer, Height>) entry.getValue().getProperty("heights")).get(n.getID());
+
+                    System.out.println(minEntry);
+                    System.out.println(entry);
+                    System.out.println(hentry);
+
+                    if (minEntry == null || entry.getValue().compareTo(minEntry) == -1 && hn.getDelta() == hentry.getDelta()) {
+                        minEntry = entry.getValue();
+                    }
+
+                }
+
+                slp.setSlid(minEntry.getID());
+                slp.setPred(minEntry.getID());
+                this.getCommonLinkWith(minEntry).setWidth(3);
             }
 
-            slp.setSlid(minEntry.getID());
-            slp.setPred(minEntry.getID());
-            this.getCommonLinkWith(minEntry).setWidth(3);
+
+            if (h.getLid() == this.getID())
+                this.setColor(Color.RED);
+            else
+                this.setColor(null);
+            Label l = new Label("hello");
+            this.setLabel(l);
+            this.setProperty("lc", lc);
+            this.setProperty("slp", slp);
+            this.setProperty("heights", heights);
+            this.setProperty("neighbors", neighbors);
+            this.setProperty("forming", forming);
+
         }
-
-
-        if (h.getLid() == this.getID())
-            this.setColor(Color.RED);
-        else
-            this.setColor(null);
-        Label l = new Label("hello");
-        this.setLabel(l);
-        this.setProperty("lc", lc);
-        this.setProperty("slp", slp);
-        this.setProperty("heights", heights);
-        this.setProperty("neighbors", neighbors);
-        this.setProperty("forming", forming);
-
     }
 
 
