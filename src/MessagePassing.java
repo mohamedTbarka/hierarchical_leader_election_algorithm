@@ -30,7 +30,7 @@ public class MessagePassing implements ActionListener {
         tp = new Topology();
         tp.setDefaultNodeModel(MyNode.class);
         //tp.setTimeUnit(10);
-        tp.setCommunicationRange(2*R);
+        //tp.setCommunicationRange(2*R);
         //tp.setSensingRange(600);
         //JViewer jv = new JViewer (tp);
         //jv.getJTopology().addBackgroundPainter(new MyBackgroundPainter());
@@ -79,7 +79,7 @@ public class MessagePassing implements ActionListener {
         }*/
         //boolean b = true;
 
-
+        /*
         for(int j = 10; j <= 100; j++) {
 
             for (int i = 0; i <= j; i++) {
@@ -90,6 +90,16 @@ public class MessagePassing implements ActionListener {
                 //Thread.sleep(50);
                 t = -2 * PI * r.nextDouble();
                 _t = -R * r.nextDouble();
+
+            }
+
+            for (int i = 0; i <= j-1; i++) {
+
+                double t = -2 * PI * r.nextDouble();
+                double _t = -R * r.nextDouble();
+                //Thread.sleep(50);
+                t = -2 * PI * r.nextDouble();
+                _t = -R * r.nextDouble();
                 tp.addNode(350 + R + 2 * R + R + 1 + _t * cos(t), 350 + _t * sin(t));
 
             }
@@ -97,12 +107,17 @@ public class MessagePassing implements ActionListener {
 
             Thread.sleep(11000);
 
+            reset();
+
+
             tp.addNode(350 + 2 * R, 350);
 
             Thread.sleep(6000);
 
-            button_1.doClick();
-            button.doClick();
+            performeTest();
+
+            //button_1.doClick();
+            //button.doClick();
             // tp.setDefaultNodeModel(Node.class);
             // tp.disableWireless();
 
@@ -192,7 +207,7 @@ public class MessagePassing implements ActionListener {
                 writer.close();
             } else {
                 BufferedWriter output = new BufferedWriter(new FileWriter("performance.txt", true));
-                output.write("tolal number of nodes : " + i + ", sensitivity : " + nhc + ", latency : " + nr);
+                output.write("\ntolal number of nodes : " + i + ", sensitivity : " + nhc + ", latency : " + nr);
                 output.close();
             }
 
@@ -209,6 +224,63 @@ public class MessagePassing implements ActionListener {
 
 
     }
+
+    private void performeTest() {
+        //tp.addNode(-1,-1);
+        nhc = 0;
+        nr=0;
+        List<Node> list = tp.getNodes();
+        int i = 0;
+
+
+
+        for (Node n : list) {
+            if((boolean)n.getProperty("hc"))
+                nhc++;
+            i++;
+            if (nr == -1)
+                nr = (Integer)n.getProperty("nr");
+            else if((Integer)n.getProperty("nr") > nr)
+                nr = (Integer)n.getProperty("nr");
+
+        }
+        try {
+            File f = new File("performance.txt");
+            if(!f.exists()) {
+                PrintWriter writer = new PrintWriter("performance.txt", "UTF-8");
+                writer.println("tolal number of nodes : " + i + ", sensitivity : " + nhc + ", latency : " + nr);
+                writer.close();
+            } else {
+                BufferedWriter output = new BufferedWriter(new FileWriter("performance.txt", true));
+                output.write("\ntolal number of nodes : " + i + ", sensitivity : " + nhc + ", latency : " + nr);
+                output.close();
+            }
+
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+
+        label.setText("tolal number of nodes : " + i + ", sensitivity : " + nhc + ", latency : " + nr);
+
+
+    }
+
+
+    private void reset() {
+        List<Node> list = tp.getNodes();
+        for (Node n : list) {
+            n.setProperty("hc", false);
+            n.setProperty("nr", 0);
+        }
+        nr = -1;
+    }
+
+
 
     public static void main(String[] args) throws InterruptedException, FileNotFoundException, UnsupportedEncodingException {
         new MessagePassing();

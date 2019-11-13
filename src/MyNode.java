@@ -50,7 +50,7 @@ public class MyNode extends Node implements Comparable<Node> {
     @Override
     public void onStart() {
         // System.out.println("hello");
-        h = new Height(0, 0, 0,0, -1,this.getID());
+        h = new Height(0, 0, 0,0, 0,this.getID());
         SubLeaderPair slp = new SubLeaderPair(this.getID(), -1);
         LogicalClock lc = new LogicalClock(0);
         //this.setProperty("height", h);
